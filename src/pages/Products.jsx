@@ -98,6 +98,7 @@ const Products = () => {
                     <table className="table-auto w-full border-collapse border border-gray-400 mt-10">
     <thead>
         <tr className="bg-gray-200">
+        <th className="border border-gray-400 px-4 py-2">ID</th>
             <th className="border border-gray-400 px-4 py-2">Name</th>
             <th className="border border-gray-400 px-4 py-2">Description</th>
             <th className="border border-gray-400 px-4 py-2">Price</th>
@@ -111,6 +112,7 @@ const Products = () => {
             products.map(product => (
                 //  console.log(product.images);
                 <tr key={product.id} className="text-center">
+                    <td className="border border-gray-400 px-4 py-2">{product.id}</td>
                     <td className="border border-gray-400 px-4 py-2">{product.name}</td>
                     <td className="border border-gray-400 px-4 py-2">{product.description}</td>
                     <td className="border border-gray-400 px-4 py-2">${product.price}</td>

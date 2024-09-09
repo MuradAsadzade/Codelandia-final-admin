@@ -105,6 +105,7 @@ const Categories = () => {
                     <table className="table-auto w-full border-collapse border border-gray-400 mt-10">
                         <thead>
                             <tr className="bg-gray-200">
+                                <th className="border border-gray-400 px-4 py-2">ID</th>
                                 <th className="border border-gray-400 px-4 py-2">Name</th>
                                 <th className="border border-gray-400 px-4 py-2">Description</th>
                                 <th className="border border-gray-400 px-4 py-2">Actions</th>
@@ -114,6 +115,7 @@ const Categories = () => {
                             {categories.length > 0 ? (
                                 categories.map(category => (
                                     <tr key={category.id} className="text-center">
+                                        <td className="border border-gray-400 px-4 py-2">{category.id}</td>
                                         <td className="border border-gray-400 px-4 py-2">{category.name}</td>
                                         <td className="border border-gray-400 px-4 py-2">{category.description}</td>
                                         <td className="border border-gray-400 px-4 py-2">

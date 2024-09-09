@@ -1,51 +1,54 @@
 import React, { useState, useEffect } from 'react';
 
-const User = () => {
-    const [users, setUsers] = useState([]);
+const ProductImages = () => {
+    const [productImages, setProductImages] = useState([]);
+    const [newProductImage, setNewProductImage] = useState({ product_id: '', image_url: '' });
+    const [editProductImage, setEditProductImage] = useState(null);
     const [error, setError] = useState(null);
-    const [newUser, setNewUser] = useState({ username: '', email: '',password:"" });
     const [addError, setAddError] = useState(null);
     const [deleteError, setDeleteError] = useState(null);
-    const [editUser, setEditUser] = useState(null);
     const [updateError, setUpdateError] = useState(null);
 
-    const fetchUsers = async () => {
+    // Fetch all product images
+    const fetchProductImages = async () => {
         try {
-            const response = await fetch('http://localhost:2004/users');
+            const response = await fetch('http://localhost:2004/product-images');
             const data = await response.json();
-            setUsers(data.data);
+            setProductImages(data.data);
         } catch (error) {
             setError(error.message);
         }
     };
 
-    const addUser = async (e) => {
+    // Add a new product image
+    const addProductImage = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:2004/users/add', {
+            const response = await fetch('http://localhost:2004/product-images/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newUser),
+                body: JSON.stringify(newProductImage),
             });
-            const addedUser = await response.json();
+            const addedProductImage = await response.json();
             if (response.ok) {
-                setUsers([...users, addedUser.data]);
-                setNewUser({ username: '', email: '',password:" " });
+                setProductImages([...productImages, addedProductImage.data]);
+                setNewProductImage({ product_id: '', image_url: '' });
             } else {
-                setAddError(addedUser.message);
+                setAddError(addedProductImage.message);
             }
         } catch (error) {
             setAddError(error.message);
         }
     };
 
-    const deleteUser = async (id) => {
+    // Delete a product image
+    const deleteProductImage = async (id) => {
         try {
-            const response = await fetch(`http://localhost:2004/users/delete/${id}`, {
+            const response = await fetch(`http://localhost:2004/product-images/delete/${id}`, {
                 method: 'DELETE',
             });
-            if (!response.success) {
-                setUsers(users.filter(user => user.id !== id));
+            if (response.ok) {
+                setProductImages(productImages.filter(image => image.id !== id));
             } else {
                 const errorData = await response.json();
                 setDeleteError(errorData.message);
@@ -55,39 +58,39 @@ const User = () => {
         }
     };
 
-    const updateUser = async (e) => {
+    // Update a product image
+    const updateProductImage = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch(`http://localhost:2004/users/update/${editUser.id}`, {
+            const response = await fetch(`http://localhost:2004/product-images/update/${editProductImage.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(editUser),
+                body: JSON.stringify(editProductImage),
             });
-            const updatedUser = await response.json();
-            console.log(updatedUser);
-            
+            const updatedProductImage = await response.json();
             if (response.ok) {
-                setUsers(users.map(user => user.id === editUser.id ? updatedUser.data : user));
-                setEditUser(null);
+                setProductImages(productImages.map(image => image.id === editProductImage.id ? updatedProductImage.data : image));
+                setEditProductImage(null);
             } else {
-                setUpdateError(updatedUser.message);
+                setUpdateError(updatedProductImage.message);
             }
         } catch (error) {
             setUpdateError(error.message);
         }
     };
 
-    const handleEditUser = (user) => {
-        setEditUser(user);
+    // Handle editing of a product image
+    const handleEditProductImage = (productImage) => {
+        setEditProductImage(productImage);
     };
 
     useEffect(() => {
-        fetchUsers();
+        fetchProductImages();
     }, []);
 
     return (
         <>
-            <h1 className="text-center text-2xl font-extrabold">Users</h1>
+            <h1 className="text-center text-2xl font-extrabold">Product Images</h1>
             {error ? (
                 <p>Error: {error}</p>
             ) : (
@@ -95,29 +98,28 @@ const User = () => {
                     <table className="table-auto w-full border-collapse border border-gray-400 mt-10">
                         <thead>
                             <tr className="bg-gray-200">
-                            <th className="border border-gray-400 px-4 py-2">ID</th>
-
-                                <th className="border border-gray-400 px-4 py-2">Username</th>
-                                <th className="border border-gray-400 px-4 py-2">Email</th>
+                                <th className="border border-gray-400 px-4 py-2">Product ID</th>
+                                <th className="border border-gray-400 px-4 py-2">Image URL</th>
                                 <th className="border border-gray-400 px-4 py-2">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {users.length > 0 ? (
-                                users.map(user => (
-                                    <tr key={user.id} className="text-center">
-                                        <td className="border border-gray-400 px-4 py-2">{user.id}</td>
-                                        <td className="border border-gray-400 px-4 py-2">{user.username}</td>
-                                        <td className="border border-gray-400 px-4 py-2">{user.email}</td>
+                            {productImages.length > 0 ? (
+                                productImages.map(image => (
+                                    <tr key={image.id} className="text-center">
+                                        <td className="border border-gray-400 px-4 py-2">{image.product_id}</td>
+                                        <td className="border border-gray-400 px-4 py-2">
+                                            <img src={image.image_url} alt="Product" className="w-32 h-32 object-cover mx-auto" />
+                                        </td>
                                         <td className="border border-gray-400 px-4 py-2">
                                             <button
-                                                onClick={() => deleteUser(user.id)}
+                                                onClick={() => deleteProductImage(image.id)}
                                                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
                                             >
                                                 Delete
                                             </button>
                                             <button
-                                                onClick={() => handleEditUser(user)}
+                                                onClick={() => handleEditProductImage(image)}
                                                 className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded ml-2"
                                             >
                                                 Update
@@ -127,9 +129,7 @@ const User = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="3" className="border border-gray-400 px-4 py-2 text-center">
-                                        No users found
-                                    </td>
+                                    <td colSpan="3" className="border border-gray-400 px-4 py-2 text-center">No images found</td>
                                 </tr>
                             )}
                         </tbody>
@@ -137,34 +137,24 @@ const User = () => {
 
                     {deleteError && <p className="text-red-500 mt-4">Error: {deleteError}</p>}
 
-                    <h2 className="text-xl font-bold mt-10">Add New User</h2>
-                    <form onSubmit={addUser} className="mt-5">
+                    <h2 className="text-xl font-bold mt-10">Add New Product Image</h2>
+                    <form onSubmit={addProductImage} className="mt-5">
                         <div className="mb-4">
-                            <label className="block text-sm font-bold mb-2">Username:</label>
+                            <label className="block text-sm font-bold mb-2">Product ID:</label>
                             <input
                                 type="text"
-                                value={newUser.username}
-                                onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                                value={newProductImage.product_id}
+                                onChange={(e) => setNewProductImage({ ...newProductImage, product_id: e.target.value })}
                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 required
                             />
                         </div>
                         <div className="mb-4">
-                            <label className="block text-sm font-bold mb-2">Email:</label>
+                            <label className="block text-sm font-bold mb-2">Image URL:</label>
                             <input
-                                type="email"
-                                value={newUser.email}
-                                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                required
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-bold mb-2">Password:</label>
-                            <input
-                                type="password"
-                                value={newUser.password}
-                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                type="text"
+                                value={newProductImage.image_url}
+                                onChange={(e) => setNewProductImage({ ...newProductImage, image_url: e.target.value })}
                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 required
                             />
@@ -174,29 +164,29 @@ const User = () => {
                             type="submit"
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                         >
-                            Add User
+                            Add Product Image
                         </button>
                     </form>
 
-                    {editUser && (
-                        <form onSubmit={updateUser} className="mt-5">
-                            <h2 className="text-xl font-bold">Update User</h2>
+                    {editProductImage && (
+                        <form onSubmit={updateProductImage} className="mt-5">
+                            <h2 className="text-xl font-bold">Update Product Image</h2>
                             <div className="mb-4">
-                                <label className="block text-sm font-bold mb-2">Username:</label>
+                                <label className="block text-sm font-bold mb-2">Product ID:</label>
                                 <input
                                     type="text"
-                                    value={editUser.username}
-                                    onChange={(e) => setEditUser({ ...editUser, username: e.target.value })}
+                                    value={editProductImage.product_id}
+                                    onChange={(e) => setEditProductImage({ ...editProductImage, product_id: e.target.value })}
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                     required
                                 />
                             </div>
                             <div className="mb-4">
-                                <label className="block text-sm font-bold mb-2">Email:</label>
+                                <label className="block text-sm font-bold mb-2">Image URL:</label>
                                 <input
-                                    type="email"
-                                    value={editUser.email}
-                                    onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                                    type="text"
+                                    value={editProductImage.image_url}
+                                    onChange={(e) => setEditProductImage({ ...editProductImage, image_url: e.target.value })}
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                     required
                                 />
@@ -206,14 +196,7 @@ const User = () => {
                                 type="submit"
                                 className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                             >
-                                Update User
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setEditUser(null)}
-                                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-4"
-                            >
-                                Cancel
+                                Update Product Image
                             </button>
                         </form>
                     )}
@@ -223,4 +206,4 @@ const User = () => {
     );
 };
 
-export default User;
+export default ProductImages;

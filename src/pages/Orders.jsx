@@ -1,51 +1,51 @@
 import React, { useState, useEffect } from 'react';
 
-const User = () => {
-    const [users, setUsers] = useState([]);
+const Orders = () => {
+    const [orders, setOrders] = useState([]);
     const [error, setError] = useState(null);
-    const [newUser, setNewUser] = useState({ username: '', email: '',password:"" });
+    const [newOrder, setNewOrder] = useState({ user_id: '', total_amount: '', status: "" });
     const [addError, setAddError] = useState(null);
     const [deleteError, setDeleteError] = useState(null);
-    const [editUser, setEditUser] = useState(null);
+    const [editOrder, setEditOrder] = useState(null); // Track order being edited
     const [updateError, setUpdateError] = useState(null);
 
-    const fetchUsers = async () => {
+    const fetchOrders = async () => {
         try {
-            const response = await fetch('http://localhost:2004/users');
+            const response = await fetch('http://localhost:2004/orders');
             const data = await response.json();
-            setUsers(data.data);
+            setOrders(data.data);
         } catch (error) {
             setError(error.message);
         }
     };
 
-    const addUser = async (e) => {
+    const addOrder = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:2004/users/add', {
+            const response = await fetch('http://localhost:2004/orders/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newUser),
+                body: JSON.stringify(newOrder),
             });
-            const addedUser = await response.json();
+            const addedOrder = await response.json();
             if (response.ok) {
-                setUsers([...users, addedUser.data]);
-                setNewUser({ username: '', email: '',password:" " });
+                setOrders([...orders, addedOrder.data]);
+                setNewOrder({ user_id: '', total_amount: '', status: "" });
             } else {
-                setAddError(addedUser.message);
+                setAddError(addedOrder.message);
             }
         } catch (error) {
             setAddError(error.message);
         }
     };
 
-    const deleteUser = async (id) => {
+    const deleteOrder = async (id) => {
         try {
-            const response = await fetch(`http://localhost:2004/users/delete/${id}`, {
+            const response = await fetch(`http://localhost:2004/orders/delete/${id}`, {
                 method: 'DELETE',
             });
             if (!response.success) {
-                setUsers(users.filter(user => user.id !== id));
+                setOrders(orders.filter(order => order.id !== id));
             } else {
                 const errorData = await response.json();
                 setDeleteError(errorData.message);
@@ -55,39 +55,38 @@ const User = () => {
         }
     };
 
-    const updateUser = async (e) => {
+    const updateOrder = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch(`http://localhost:2004/users/update/${editUser.id}`, {
+            const response = await fetch(`http://localhost:2004/orders/update/${editOrder.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(editUser),
+                body: JSON.stringify(editOrder),
             });
-            const updatedUser = await response.json();
-            console.log(updatedUser);
-            
+
+            const updatedOrder = await response.json();
             if (response.ok) {
-                setUsers(users.map(user => user.id === editUser.id ? updatedUser.data : user));
-                setEditUser(null);
+                setOrders(orders.map(order => order.id === editOrder.id ? updatedOrder.data : order));
+                setEditOrder(null);
             } else {
-                setUpdateError(updatedUser.message);
+                setUpdateError(updatedOrder.message);
             }
         } catch (error) {
             setUpdateError(error.message);
         }
     };
 
-    const handleEditUser = (user) => {
-        setEditUser(user);
+    const handleEditOrder = (order) => {
+        setEditOrder(order);
     };
 
     useEffect(() => {
-        fetchUsers();
+        fetchOrders();
     }, []);
 
     return (
         <>
-            <h1 className="text-center text-2xl font-extrabold">Users</h1>
+            <h1 className="text-center text-2xl font-extrabold">Orders</h1>
             {error ? (
                 <p>Error: {error}</p>
             ) : (
@@ -96,28 +95,30 @@ const User = () => {
                         <thead>
                             <tr className="bg-gray-200">
                             <th className="border border-gray-400 px-4 py-2">ID</th>
+                                <th className="border border-gray-400 px-4 py-2">User ID</th>
+                                <th className="border border-gray-400 px-4 py-2">Total Amount</th>
+                                <th className="border border-gray-400 px-4 py-2">Status</th>
 
-                                <th className="border border-gray-400 px-4 py-2">Username</th>
-                                <th className="border border-gray-400 px-4 py-2">Email</th>
                                 <th className="border border-gray-400 px-4 py-2">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {users.length > 0 ? (
-                                users.map(user => (
-                                    <tr key={user.id} className="text-center">
-                                        <td className="border border-gray-400 px-4 py-2">{user.id}</td>
-                                        <td className="border border-gray-400 px-4 py-2">{user.username}</td>
-                                        <td className="border border-gray-400 px-4 py-2">{user.email}</td>
+                            {orders.length > 0 ? (
+                                orders.map(order => (
+                                    <tr key={order.id} className="text-center">
+                                        <td className="border border-gray-400 px-4 py-2">{order.id}</td>
+                                        <td className="border border-gray-400 px-4 py-2">{order.user_id}</td>
+                                        <td className="border border-gray-400 px-4 py-2">${order.total_amount}</td>
+                                        <td className="border border-gray-400 px-4 py-2">{order.status}</td>
                                         <td className="border border-gray-400 px-4 py-2">
                                             <button
-                                                onClick={() => deleteUser(user.id)}
+                                                onClick={() => deleteOrder(order.id)}
                                                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
                                             >
                                                 Delete
                                             </button>
                                             <button
-                                                onClick={() => handleEditUser(user)}
+                                                onClick={() => handleEditOrder(order)}
                                                 className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded ml-2"
                                             >
                                                 Update
@@ -127,9 +128,7 @@ const User = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="3" className="border border-gray-400 px-4 py-2 text-center">
-                                        No users found
-                                    </td>
+                                    <td colSpan="4" className="border border-gray-400 px-4 py-2 text-center">No orders found</td>
                                 </tr>
                             )}
                         </tbody>
@@ -137,34 +136,35 @@ const User = () => {
 
                     {deleteError && <p className="text-red-500 mt-4">Error: {deleteError}</p>}
 
-                    <h2 className="text-xl font-bold mt-10">Add New User</h2>
-                    <form onSubmit={addUser} className="mt-5">
+                    <h2 className="text-xl font-bold mt-10">Add New Order</h2>
+                    <form onSubmit={addOrder} className="mt-5">
                         <div className="mb-4">
-                            <label className="block text-sm font-bold mb-2">Username:</label>
+                            <label className="block text-sm font-bold mb-2">User ID:</label>
+                            <input
+                                type="number"
+                                value={newOrder.user_id}
+                                onChange={(e) => setNewOrder({ ...newOrder, user_id: e.target.value })}
+                                className="shadowappearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-bold mb-2">Total Amount:</label>
+                            <input
+                                type="number"
+                                value={newOrder.total_amount}
+                                onChange={(e) => setNewOrder({ ...newOrder, total_amount: e.target.value })}
+                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-bold mb-2">Status:</label>
                             <input
                                 type="text"
-                                value={newUser.username}
-                                onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                required
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-bold mb-2">Email:</label>
-                            <input
-                                type="email"
-                                value={newUser.email}
-                                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                required
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-bold mb-2">Password:</label>
-                            <input
-                                type="password"
-                                value={newUser.password}
-                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+      
+                                value={newOrder.status}
+                                onChange={(e) => setNewOrder({ ...newOrder, status: e.target.value })}
                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 required
                             />
@@ -174,29 +174,40 @@ const User = () => {
                             type="submit"
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                         >
-                            Add User
+                            Add Order
                         </button>
                     </form>
 
-                    {editUser && (
-                        <form onSubmit={updateUser} className="mt-5">
-                            <h2 className="text-xl font-bold">Update User</h2>
+                    {editOrder && (
+                        <form onSubmit={updateOrder} className="mt-5">
+                            <h2 className="text-xl font-bold">Update Order</h2>
                             <div className="mb-4">
-                                <label className="block text-sm font-bold mb-2">Username:</label>
+                                <label className="block text-sm font-bold mb-2">User ID:</label>
                                 <input
-                                    type="text"
-                                    value={editUser.username}
-                                    onChange={(e) => setEditUser({ ...editUser, username: e.target.value })}
+                                    type="number"
+                                    value={editOrder.user_id}
+                                    onChange={(e) => setEditOrder({ ...editOrder, user_id: e.target.value })}
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                     required
                                 />
                             </div>
                             <div className="mb-4">
-                                <label className="block text-sm font-bold mb-2">Email:</label>
+                                <label className="block text-sm font-bold mb-2">Total Amount:</label>
                                 <input
-                                    type="email"
-                                    value={editUser.email}
-                                    onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                                    type="number"
+                                    value={editOrder.total_amount}
+                                    onChange={(e) => setEditOrder({ ...editOrder, total_amount: e.target.value })}
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    required
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-bold mb-2">Status:</label>
+                                <input
+                                    type="text"
+
+                                    value={editOrder.status}
+                                    onChange={(e) => setEditOrder({ ...editOrder, status: e.target.value })}
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                     required
                                 />
@@ -206,11 +217,11 @@ const User = () => {
                                 type="submit"
                                 className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                             >
-                                Update User
+                                Update Order
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setEditUser(null)}
+                                onClick={() => setEditOrder(null)}
                                 className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-4"
                             >
                                 Cancel
@@ -221,6 +232,6 @@ const User = () => {
             )}
         </>
     );
-};
+}
 
-export default User;
+export default Orders;

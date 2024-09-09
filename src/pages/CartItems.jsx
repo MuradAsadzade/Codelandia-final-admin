@@ -1,51 +1,54 @@
 import React, { useState, useEffect } from 'react';
 
-const User = () => {
-    const [users, setUsers] = useState([]);
+const CartItems = () => {
+    const [cartItems, setCartItems] = useState([]);
     const [error, setError] = useState(null);
-    const [newUser, setNewUser] = useState({ username: '', email: '',password:"" });
+    const [newCartItem, setNewCartItem] = useState({ user_id: '', product_id: '', quantity: 1 });
     const [addError, setAddError] = useState(null);
     const [deleteError, setDeleteError] = useState(null);
-    const [editUser, setEditUser] = useState(null);
+    const [editCartItem, setEditCartItem] = useState(null); // Track cart item being edited
     const [updateError, setUpdateError] = useState(null);
 
-    const fetchUsers = async () => {
+    // Fetch all cart items
+    const fetchCartItems = async () => {
         try {
-            const response = await fetch('http://localhost:2004/users');
+            const response = await fetch('http://localhost:2004/cart-items');
             const data = await response.json();
-            setUsers(data.data);
+            setCartItems(data.data);
         } catch (error) {
             setError(error.message);
         }
     };
 
-    const addUser = async (e) => {
+    // Add a new cart item
+    const addCartItem = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:2004/users/add', {
+            const response = await fetch('http://localhost:2004/cart-items/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newUser),
+                body: JSON.stringify(newCartItem),
             });
-            const addedUser = await response.json();
+            const addedCartItem = await response.json();
             if (response.ok) {
-                setUsers([...users, addedUser.data]);
-                setNewUser({ username: '', email: '',password:" " });
+                setCartItems([...cartItems, addedCartItem.data]);
+                setNewCartItem({ user_id: '', product_id: '', quantity: 1 });
             } else {
-                setAddError(addedUser.message);
+                setAddError(addedCartItem.message);
             }
         } catch (error) {
             setAddError(error.message);
         }
     };
 
-    const deleteUser = async (id) => {
+    // Delete a cart item
+    const deleteCartItem = async (id) => {
         try {
-            const response = await fetch(`http://localhost:2004/users/delete/${id}`, {
+            const response = await fetch(`http://localhost:2004/cart-items/delete/${id}`, {
                 method: 'DELETE',
             });
-            if (!response.success) {
-                setUsers(users.filter(user => user.id !== id));
+            if (response.ok) {
+                setCartItems(cartItems.filter(cartItem => cartItem.id !== id));
             } else {
                 const errorData = await response.json();
                 setDeleteError(errorData.message);
@@ -55,39 +58,39 @@ const User = () => {
         }
     };
 
-    const updateUser = async (e) => {
+    // Update a cart item
+    const updateCartItem = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch(`http://localhost:2004/users/update/${editUser.id}`, {
+            const response = await fetch(`http://localhost:2004/cart-items/update/${editCartItem.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(editUser),
+                body: JSON.stringify(editCartItem),
             });
-            const updatedUser = await response.json();
-            console.log(updatedUser);
-            
+            const updatedCartItem = await response.json();
             if (response.ok) {
-                setUsers(users.map(user => user.id === editUser.id ? updatedUser.data : user));
-                setEditUser(null);
+                setCartItems(cartItems.map(cartItem => cartItem.id === editCartItem.id ? updatedCartItem.data : cartItem));
+                setEditCartItem(null);
             } else {
-                setUpdateError(updatedUser.message);
+                setUpdateError(updatedCartItem.message);
             }
         } catch (error) {
             setUpdateError(error.message);
         }
     };
 
-    const handleEditUser = (user) => {
-        setEditUser(user);
+    // Trigger the edit form for a specific cart item
+    const handleEditCartItem = (cartItem) => {
+        setEditCartItem(cartItem);
     };
 
     useEffect(() => {
-        fetchUsers();
+        fetchCartItems();
     }, []);
 
     return (
         <>
-            <h1 className="text-center text-2xl font-extrabold">Users</h1>
+            <h1 className="text-center text-2xl font-extrabold">Cart Items</h1>
             {error ? (
                 <p>Error: {error}</p>
             ) : (
@@ -95,29 +98,28 @@ const User = () => {
                     <table className="table-auto w-full border-collapse border border-gray-400 mt-10">
                         <thead>
                             <tr className="bg-gray-200">
-                            <th className="border border-gray-400 px-4 py-2">ID</th>
-
-                                <th className="border border-gray-400 px-4 py-2">Username</th>
-                                <th className="border border-gray-400 px-4 py-2">Email</th>
+                                <th className="border border-gray-400 px-4 py-2">User ID</th>
+                                <th className="border border-gray-400 px-4 py-2">Product ID</th>
+                                <th className="border border-gray-400 px-4 py-2">Quantity</th>
                                 <th className="border border-gray-400 px-4 py-2">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {users.length > 0 ? (
-                                users.map(user => (
-                                    <tr key={user.id} className="text-center">
-                                        <td className="border border-gray-400 px-4 py-2">{user.id}</td>
-                                        <td className="border border-gray-400 px-4 py-2">{user.username}</td>
-                                        <td className="border border-gray-400 px-4 py-2">{user.email}</td>
+                            {cartItems.length > 0 ? (
+                                cartItems.map(cartItem => (
+                                    <tr key={cartItem.id} className="text-center">
+                                        <td className="border border-gray-400 px-4 py-2">{cartItem.user_id}</td>
+                                        <td className="border border-gray-400 px-4 py-2">{cartItem.product_id}</td>
+                                        <td className="border border-gray-400 px-4 py-2">{cartItem.quantity}</td>
                                         <td className="border border-gray-400 px-4 py-2">
                                             <button
-                                                onClick={() => deleteUser(user.id)}
+                                                onClick={() => deleteCartItem(cartItem.id)}
                                                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
                                             >
                                                 Delete
                                             </button>
                                             <button
-                                                onClick={() => handleEditUser(user)}
+                                                onClick={() => handleEditCartItem(cartItem)}
                                                 className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded ml-2"
                                             >
                                                 Update
@@ -127,9 +129,7 @@ const User = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="3" className="border border-gray-400 px-4 py-2 text-center">
-                                        No users found
-                                    </td>
+                                    <td colSpan="4" className="border border-gray-400 px-4 py-2 text-center">No cart items found</td>
                                 </tr>
                             )}
                         </tbody>
@@ -137,34 +137,35 @@ const User = () => {
 
                     {deleteError && <p className="text-red-500 mt-4">Error: {deleteError}</p>}
 
-                    <h2 className="text-xl font-bold mt-10">Add New User</h2>
-                    <form onSubmit={addUser} className="mt-5">
+                    <h2 className="text-xl font-bold mt-10">Add New Cart Item</h2>
+                    <form onSubmit={addCartItem} className="mt-5">
                         <div className="mb-4">
-                            <label className="block text-sm font-bold mb-2">Username:</label>
+                            <label className="block text-sm font-bold mb-2">User ID:</label>
                             <input
                                 type="text"
-                                value={newUser.username}
-                                onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                                value={newCartItem.user_id}
+                                onChange={(e) => setNewCartItem({ ...newCartItem, user_id: e.target.value })}
                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 required
                             />
                         </div>
                         <div className="mb-4">
-                            <label className="block text-sm font-bold mb-2">Email:</label>
+                            <label className="block text-sm font-bold mb-2">Product ID:</label>
                             <input
-                                type="email"
-                                value={newUser.email}
-                                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                                type="text"
+                                value={newCartItem.product_id}
+                                onChange={(e) => setNewCartItem({ ...newCartItem, product_id: e.target.value })}
                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 required
                             />
                         </div>
                         <div className="mb-4">
-                            <label className="block text-sm font-bold mb-2">Password:</label>
+                            <label className="block text-sm font-bold mb-2">Quantity:</label>
                             <input
-                                type="password"
-                                value={newUser.password}
-                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                type="number"
+                                min="1"
+                                value={newCartItem.quantity}
+                                onChange={(e) => setNewCartItem({ ...newCartItem, quantity: e.target.value })}
                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 required
                             />
@@ -174,29 +175,40 @@ const User = () => {
                             type="submit"
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                         >
-                            Add User
+                            Add Cart Item
                         </button>
                     </form>
 
-                    {editUser && (
-                        <form onSubmit={updateUser} className="mt-5">
-                            <h2 className="text-xl font-bold">Update User</h2>
+                    {editCartItem && (
+                        <form onSubmit={updateCartItem} className="mt-5">
+                            <h2 className="text-xl font-bold">Update Cart Item</h2>
                             <div className="mb-4">
-                                <label className="block text-sm font-bold mb-2">Username:</label>
+                                <label className="block text-sm font-bold mb-2">User ID:</label>
                                 <input
                                     type="text"
-                                    value={editUser.username}
-                                    onChange={(e) => setEditUser({ ...editUser, username: e.target.value })}
+                                    value={editCartItem.user_id}
+                                    onChange={(e) => setEditCartItem({ ...editCartItem, user_id: e.target.value })}
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                     required
                                 />
                             </div>
                             <div className="mb-4">
-                                <label className="block text-sm font-bold mb-2">Email:</label>
+                                <label className="block text-sm font-bold mb-2">Product ID:</label>
                                 <input
-                                    type="email"
-                                    value={editUser.email}
-                                    onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                                    type="text"
+                                    value={editCartItem.product_id}
+                                    onChange={(e) => setEditCartItem({ ...editCartItem, product_id: e.target.value })}
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    required
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-bold mb-2">Quantity:</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={editCartItem.quantity}
+                                    onChange={(e) => setEditCartItem({ ...editCartItem, quantity: e.target.value })}
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                     required
                                 />
@@ -206,14 +218,7 @@ const User = () => {
                                 type="submit"
                                 className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                             >
-                                Update User
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setEditUser(null)}
-                                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-4"
-                            >
-                                Cancel
+                                Update Cart Item
                             </button>
                         </form>
                     )}
@@ -223,4 +228,4 @@ const User = () => {
     );
 };
 
-export default User;
+export default CartItems;
