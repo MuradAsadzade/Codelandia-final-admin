@@ -13,7 +13,7 @@ const Login = ({ onLoginSuccess }) => {
         setSuccess(null);
 
         try {
-            const response = await fetch('http://localhost:2004/auth/login', {
+            const response = await fetch('http://localhost:2004/auth/admin/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -23,9 +23,8 @@ const Login = ({ onLoginSuccess }) => {
             const data = await response.json();
             if (response.ok) {
                 setSuccess(data.message);
-                // Call the onLoginSuccess prop to update the auth state in App
+     
                 onLoginSuccess();
-                // Optionally store the token in localStorage
                 localStorage.setItem('token', data.data.token);
                 console.log("Murad:", data);
                 console.log(data.data.token);
@@ -73,12 +72,12 @@ const Login = ({ onLoginSuccess }) => {
                     Login
                 </button>
 
-                <Link to="/register">
+                {/* <Link to="/register">
                     <span className="bg-black ml-10 w-10 hover:bg-gray-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     >
                         Dont have account?
                     </span>
-                </Link>
+                </Link> */}
             </form>
 
         </div>

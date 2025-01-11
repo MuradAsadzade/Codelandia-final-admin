@@ -13,6 +13,7 @@ import Reviews from './pages/Reviews';
 import Shippings from './pages/Shippings';
 import Login from './pages/Login';
 import Register from './pages/Register'; // Import the Register component
+import OrderItems from './pages/OrderIitems';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -23,9 +24,9 @@ function App() {
   };
 
   // Function to handle successful registration
-  const handleRegisterSuccess = () => {
-    setIsAuthenticated(true);
-  };
+  // const handleRegisterSuccess = () => {
+  //   setIsAuthenticated(true);
+  // };
 
   return (
     <>
@@ -34,13 +35,15 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
-          <Route path="/register" element={<Register onRegisterSuccess={handleRegisterSuccess} />} />
+          {/* <Route path="/register" element={<Register onRegisterSuccess={handleRegisterSuccess} />} /> */}
 
           {/* Protected routes */}
           <Route path="/users" element={isAuthenticated ? <Users /> : <Navigate to="/login" />} />
           <Route path="/categories" element={isAuthenticated ? <Categories /> : <Navigate to="/login" />} />
           <Route path="/products" element={isAuthenticated ? <Products /> : <Navigate to="/login" />} />
           <Route path="/orders" element={isAuthenticated ? <Orders /> : <Navigate to="/login" />} />
+          <Route path="/order-items" element={isAuthenticated ? <OrderItems /> : <Navigate to="/login" />} />
+
           <Route path="/cart-items" element={isAuthenticated ? <CartItems /> : <Navigate to="/login" />} />
           <Route path="/payments" element={isAuthenticated ? <Payments /> : <Navigate to="/login" />} />
           <Route path="/product-images" element={isAuthenticated ? <ProductImages /> : <Navigate to="/login" />} />
